@@ -70,6 +70,79 @@ class Gender
     const INDIA = 51;
     const JAPAN = 52;
     const KOREA = 53;
+    const VIETNAM = 54;
+    
+    protected const COUNTRY_NAMES = [
+        Gender::BRITAIN => ["UK", "Great Britain"],
+        Gender::IRELAND => ["IRE", "Ireland"],
+        Gender::USA => ["USA", "U.S.A."],
+        
+        Gender::ITALY => ["I", "Italy"],
+        Gender::MALTA => ["M", "Malta"],
+        Gender::PORTUGAL => ["P", "Portugal"],
+        Gender::SPAIN => ["E", "Spain"],
+        Gender::FRANCE => ["F", "France"],
+        
+        Gender::BELGIUM => ["B", "Belgium"],
+        Gender::LUXEMBOURG => ["LUX", "Luxembourg"],
+        Gender::NETHERLANDS => ["NL", "the Netherlands"],
+        
+        Gender::EAST_FRISIA => ["FRI", "East Frisia"],
+        Gender::GERMANY => ["D", "Germany"],
+        Gender::AUSTRIA => ["A", "Austria"],
+        Gender::SWISS => ["CH", "Swiss"],
+        
+        Gender::ICELAND => ["ICE", "Iceland"],
+        Gender::DENMARK => ["DK", "Denmark"],
+        Gender::NORWAY => ["N", "Norway"],
+        Gender::SWEDEN => ["S", "Sweden"],
+        Gender::FINLAND => ["FIN", "Finland"],
+        
+        Gender::ESTONIA => ["EST", "Estonia"],
+        Gender::LATVIA => ["LTV", "Latvia"],
+        Gender::LITHUANIA => ["LIT", "Lithuania"],
+        
+        Gender::POLAND => ["PL", "Poland"],
+        Gender::CZECH_REP => ["CZ", "Czech Republic"],
+        Gender::SLOVAKIA => ["SK", "Slovakia"],
+        Gender::HUNGARY => ["H", "Hungary"],
+        Gender::ROMANIA => ["RO", "Romania"],
+        Gender::BULGARIA => ["BG", "Bulgaria"],
+        
+        Gender::BOSNIA => ["BIH","Bosnia and Herzegovina"],
+        Gender::CROATIA => ["CRO", "Croatia"],
+        Gender::KOSOVO => ["KOS", "Kosovo"],
+        Gender::MACEDONIA => ["MK", "Macedonia"],
+        Gender::MONTENEGRO => ["MON", "Montenegro"],
+        Gender::SERBIA => ["SER", "Serbia"],
+        Gender::SLOVENIA => ["SLO", "Slovenia"],
+        Gender::ALBANIA => ["AL", "Albania"],
+        Gender::GREECE => ["GR", "Greece"],
+        
+        Gender::RUSSIA => ["RUS", "Russia"],
+        Gender::BELARUS => ["BY", "Belarus"],
+        Gender::MOLDOVA => ["MOL", "Moldova"],
+        Gender::UKRAINE => ["UKR", "Ukraine"],
+        Gender::ARMENIA => ["ARM", "Armenia"],
+        Gender::AZERBAIJAN => ["AZE", "Azerbaijan"],
+        Gender::GEORGIA => ["GEO", "Georgia"],
+        Gender::KAZAKH_UZBEK => ["KAZ", "Kazakhstan/Uzbekistan"],
+        
+        Gender::TURKEY => ["TR", "Turkey"],
+        Gender::ARABIA => ["AR", "Arabia/Persia"],
+        Gender::ISRAEL => ["ISR", "Israel"],
+        Gender::CHINA => ["CHN", "China"],
+        Gender::INDIA => ["IND", "India/Sri Lanka"],
+        Gender::JAPAN => ["JAP", "Japan"],
+        Gender::KOREA => ["KOR", "Korea"],
+        Gender::VIETNAM => ["VN", "Vietnam"],
+    ];
+
+    protected const CHECK_STRING = "# DO NOT CHANGE:   FILE-FORMAT DEFINITION-DATE = 2008-11-16 ";
+
+    protected const DATA_NAME_POS =     3;
+    protected const DATA_NAME_LENGTH =  26;
+    protected const MAX_LINE_SIZE =     100;
 
     /**
      * @var resource
@@ -117,6 +190,15 @@ class Gender
      */
     public function country(int $country): array
     {
+        if (!isset(self::COUNTRY_NAMES[$country])) {
+            throw new \InvalidArgumentException("Unknown country: $country");
+        }
+        list($shortName, $longName) = self::COUNTRY_NAMES[$country];
+
+        return [
+            "country_short" => $shortName,
+            "country" => $longName
+        ];
     }
 
     /**
@@ -127,6 +209,65 @@ class Gender
      */
     public function get(string $name, int $country = Gender::ANY_COUNTRY): int
     {
+        //Lookup $name, if found return result
+        //Split on space, hyphen or dot, and lookup each part (including dots for abbreviations), combining results
+    }
+
+    protected function searchName(string $name, int $country): int
+    {
+        //If empty return UNISEX
+        //if at least 2 chars and ends in dot set mode to abbr.
+        // do a bin search on column 3, assuming it's 26 chars long
+        // if result is <0 and == 10 do internal error, if just < 0 do name not found
+        // seek to the pos
+
+        //Enter restart loop
+        //TODO: Track through the rest of internal_search (probably can ignore anything other than &searchGender,
+        //      and share the logic as we get to the other methods
+    }
+
+    /**
+     * Find the first occurrence of the $name in the data source.
+     * @param string $name
+     * @param bool $getMatchOrNextHigher
+     * @return int -10 on internal error, -1 on not found, or the position of the start of the line in the data source if found.
+     */
+    protected function binarySearch(string $name, bool $getMatchOrNextHigher = false): int
+    {
+        $offset = Gender::DATA_NAME_POS;
+        $length = Gender::DATA_NAME_LENGTH;
+        //find line size
+            //Seek to begining return -10 on failure
+            //Read the first line
+            //Check that it is exactly the check line, return -10 otherwise
+            //set line size to stream position
+        //Find record cound
+            //Seek to end return -10 on failure
+            //set record count to stream position+1 /line size
+
+        //Find
+            //Start Position 1 at the first record, and position2 at the end
+            //Set current position to the middle record
+            //read the line of the current position (seek then read)
+            //Read the name from offset up to length, unless the line starts with #
+            //Using weird built in str cmp check if they match ignoring separators
+            //If they do, and the position = p1 break, if p != p1, set position 2 to the current position
+            //If the first character that does not match has a lower value set p2 = p-1
+            //if the first charcter that does not match has a higher value set p1 = p+1 and set p = p+1
+            //repeat while p1 <= p2
+
+        //If none were found, check if we should return whatever was after the last line we looked at, so long as the last thing we looked at was higher than our name
+
+        //if found something (either through search or next higher) return the start of the line as an int (p * line length)
+
+        //If none were found return -1
+    }
+
+    protected function strcmp(string $name, string $name2, bool $shouldCompareAbbreviations, $shouldIgnoreSeparators): int
+    {
+        //If should cmp abr. check if $name ends in dot, and see if $name2 starts with $name up to dot
+        //convert all chars in $name and $name2 using substitutions called for in algo via sortchar and sortchar2
+        //then use strcmp
     }
 
     /**
@@ -148,5 +289,6 @@ class Gender
      */
     public function similarNames(string $name, ?int $country = Gender::ANY_COUNTRY): array
     {
+        //This will be a very long method
     }
 }
