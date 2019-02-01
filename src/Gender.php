@@ -1,8 +1,10 @@
 <?php
 namespace Gender;
 
+use PHPUnit\Framework\MockObject\RuntimeException;
+
 /**
- * Class Gender ported from pecl/gender 0.6.0
+ * Class Gender ported from pecl/gender 1.1.0
  * @package Gender
  */
 class Gender
@@ -279,6 +281,7 @@ class Gender
      */
     public function isNick(string $name0, string $name1, int $country = Gender::ANY_COUNTRY): bool
     {
+        throw new RuntimeException("Unimplemented");
     }
 
     /**
@@ -290,5 +293,6 @@ class Gender
     public function similarNames(string $name, ?int $country = Gender::ANY_COUNTRY): array
     {
         //This will be a very long method
+        throw new RuntimeException("Unimplemented");
     }
 }
