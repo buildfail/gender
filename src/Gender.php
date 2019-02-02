@@ -209,12 +209,32 @@ class Gender
      */
     public function get(string $name, int $country = Gender::ANY_COUNTRY): int
     {
+        return $this->searchName($name, $country);
         //Lookup $name, if found return result
         //Split on space, hyphen or dot, and lookup each part (including dots for abbreviations), combining results
     }
 
     protected function searchName(string $name, int $country): int
     {
+        if(strlen($name) === 0) {
+            return Gender::IS_UNISEX_NAME;
+        }
+
+        $position = $this->binarySearch($name);
+
+        fseek($this->nameDataFile, $position);
+
+        do {
+            $line = fgets($this->nameDataFile, Gender::MAX_LINE_SIZE);
+
+            $foundName = "";
+            if (substr($line, 0, 1) !== '#') {
+                $foundName = substr($line, Gender::DATA_NAME_POS, Gender::DATA_NAME_LENGTH);
+            }
+
+            ///?????
+
+        } while(false);
         //If empty return UNISEX
         //if at least 2 chars and ends in dot set mode to abbr.
         // do a bin search on column 3, assuming it's 26 chars long
@@ -224,48 +244,135 @@ class Gender
         //Enter restart loop
         //TODO: Track through the rest of internal_search (probably can ignore anything other than &searchGender,
         //      and share the logic as we get to the other methods
+        return;
     }
 
     /**
      * Find the first occurrence of the $name in the data source.
      * @param string $name
-     * @param bool $getMatchOrNextHigher
      * @return int -10 on internal error, -1 on not found, or the position of the start of the line in the data source if found.
      */
-    protected function binarySearch(string $name): int
+    public function binarySearch(string $name): int
     {
-        $offset = Gender::DATA_NAME_POS;
-        $length = Gender::DATA_NAME_LENGTH;
-        //find line size
-            //Seek to begining return -10 on failure
-            //Read the first line
-            //Check that it is exactly the check line, return -10 otherwise
-            //set line size to stream position
-        //Find record cound
-            //Seek to end return -10 on failure
-            //set record count to stream position+1 /line size
+        if (fseek($this->nameDataFile, 0) === -1) {
+            throw new \RuntimeException("Unable to seek data file");
+        }
+        $line = fgets($this->nameDataFile, Gender::MAX_LINE_SIZE+1);
+        if (strpos($line, Gender::CHECK_STRING) !== 0) {
+            throw new \RuntimeException("Data file is not a known format");
+        }
+        $lineSize = ftell($this->nameDataFile);
+        if (fseek($this->nameDataFile, 0, SEEK_END) === -1) {
+            throw new \RuntimeException("Unable to seek data file");
+        }
+        $recordCount = ftell($this->nameDataFile)/$lineSize;
 
-        //Find
-            //Start Position 1 at the first record, and position2 at the end
-            //Set current position to the middle record
-            //read the line of the current position (seek then read)
-            //Read the name from offset up to length, unless the line starts with #
-            //Using weird built in str cmp check if they match ignoring separators
-            //If they do, and the position = p1 break, if p != p1, set position 2 to the current position
-            //If the first character that does not match has a lower value set p2 = p-1
-            //if the first charcter that does not match has a higher value set p1 = p+1 and set p = p+1
-            //repeat while p1 <= p2
+        $position1 = 0;
+        $position2 = $recordCount;
 
-        //if found something return the start of the line as an int (p * line length)
+        $i = -1;
 
-        //If none were found return -1
+        while ($position1 <= $position2) {
+            $position = (int)(($position1 + $position2) / 2);
+            fseek($this->nameDataFile, $position * $lineSize);
+            $line = fgets($this->nameDataFile, Gender::MAX_LINE_SIZE+1);
+
+            $foundName = '';
+
+            if (substr($line, 0, 1) !== '#') {
+                $foundName = substr($line, Gender::DATA_NAME_POS, Gender::DATA_NAME_LENGTH);
+            }
+
+            $i = $this->compareNames($name, $foundName, true);
+
+            if ($i === 0) {
+                if ($position1 == $position) {
+                    return $position * $lineSize;
+                }
+                $position2 = $position;
+            } elseif ($i < 0) {
+                $position2 = $position - 1;
+            } else {
+                $position1 = $position + 1;
+            }
+        }
+
+        return -1;
     }
 
-    protected function strcmp(string $name, string $name2, bool $shouldCompareAbbreviations, $shouldIgnoreSeparators): int
+    protected function compareNames(string $name, string $internalName, bool $shouldCompareAbbreviations): int
     {
-        //convert all chars in $name and $name2 using substitutions called for in algo via sortchar and sortchar2
+        $nameScrubbed = $this->scrubName($name);
+        $internalNameScrubbed = $this->scrubName($internalName);
+
+        if ($shouldCompareAbbreviations && substr($nameScrubbed, -1) === '.') {
+            return strpos($internalNameScrubbed, substr($nameScrubbed, 0, -1)) === 0;
+        }
+
+        return strcmp($nameScrubbed, $internalNameScrubbed);
+
         //If should cmp abr. check if $name ends in dot, and see if $name2 starts with $name up to dot
         //then use strcmp
+    }
+
+    protected function scrubName($name)
+    {
+        $umlautConversions = [
+            "A",
+            "A",
+            "A",
+            "A",
+            "AA",
+            "AE",
+            "AE",
+            "C",
+            "D",
+            "E",
+            "E",
+            "E",
+            "E",
+            "I",
+            "I",
+            "I",
+            "I",
+            "NH",
+            "O",
+            "O",
+            "O",
+            "O",
+            "OE",
+            "OE",
+            "OE",
+            "S",
+            "SS",
+            "TH",
+            "U",
+            "U",
+            "U",
+            "UE",
+            "Y",
+            "Y",
+        ];
+        return
+        str_replace(
+            str_split(mb_convert_encoding('ÀÁÂÃÅÄÆÇÐÈÉÊËÌÍÎÏÑÒÓÔÕÖØŒŠßÞÙÚÛÜÝŸ', 'latin1', 'utf8')),
+            $umlautConversions,
+            str_replace(
+                str_split(mb_convert_encoding('àáâãåäæçðèéêëìíîïñòóôõöøœšßþùúûüýÿ', 'latin1', 'utf8')),
+                $umlautConversions,
+                strtoupper(
+                    str_replace(
+                        ["<>^,´'`~°/"],
+                        '',
+                        str_replace(
+                            ['-', '+', "'"],
+                            ['', '', '´'],
+                            trim($name)
+                        )
+                    )
+                )
+            )
+        );
     }
 
     /**
