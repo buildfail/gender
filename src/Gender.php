@@ -1,8 +1,6 @@
 <?php
 namespace Gender;
 
-use PHPUnit\Framework\MockObject\RuntimeException;
-
 /**
  * Class Gender ported from pecl/gender 1.1.0
  * @package Gender
@@ -220,7 +218,7 @@ class Gender
         //If empty return UNISEX
         //if at least 2 chars and ends in dot set mode to abbr.
         // do a bin search on column 3, assuming it's 26 chars long
-        // if result is <0 and == 10 do internal error, if just < 0 do name not found
+        // if result is <0 and == -10 do internal error, if just < 0 do name not found
         // seek to the pos
 
         //Enter restart loop
@@ -234,7 +232,7 @@ class Gender
      * @param bool $getMatchOrNextHigher
      * @return int -10 on internal error, -1 on not found, or the position of the start of the line in the data source if found.
      */
-    protected function binarySearch(string $name, bool $getMatchOrNextHigher = false): int
+    protected function binarySearch(string $name): int
     {
         $offset = Gender::DATA_NAME_POS;
         $length = Gender::DATA_NAME_LENGTH;
@@ -258,17 +256,15 @@ class Gender
             //if the first charcter that does not match has a higher value set p1 = p+1 and set p = p+1
             //repeat while p1 <= p2
 
-        //If none were found, check if we should return whatever was after the last line we looked at, so long as the last thing we looked at was higher than our name
-
-        //if found something (either through search or next higher) return the start of the line as an int (p * line length)
+        //if found something return the start of the line as an int (p * line length)
 
         //If none were found return -1
     }
 
     protected function strcmp(string $name, string $name2, bool $shouldCompareAbbreviations, $shouldIgnoreSeparators): int
     {
-        //If should cmp abr. check if $name ends in dot, and see if $name2 starts with $name up to dot
         //convert all chars in $name and $name2 using substitutions called for in algo via sortchar and sortchar2
+        //If should cmp abr. check if $name ends in dot, and see if $name2 starts with $name up to dot
         //then use strcmp
     }
 
@@ -281,7 +277,7 @@ class Gender
      */
     public function isNick(string $name0, string $name1, int $country = Gender::ANY_COUNTRY): bool
     {
-        throw new RuntimeException("Unimplemented");
+        throw new \RuntimeException("Unimplemented");
     }
 
     /**
@@ -290,9 +286,9 @@ class Gender
      * @param int $country Country id identified by Gender class constant. If ommited ANY_COUNTRY is used.
      * @return string[]
      */
-    public function similarNames(string $name, ?int $country = Gender::ANY_COUNTRY): array
+    public function similarNames(string $name, int $country = Gender::ANY_COUNTRY): array
     {
         //This will be a very long method
-        throw new RuntimeException("Unimplemented");
+        throw new \RuntimeException("Unimplemented");
     }
 }

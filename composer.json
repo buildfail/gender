@@ -11,6 +11,10 @@
         {
             "name": "John VanDeWeghe",
             "email": "vandeweghe@lunixlabs.com"
+        },
+        {
+            "name": "Jon Harder",
+            "email": "jonharder6@gmail.com"
         }
     ],
     "require": {
