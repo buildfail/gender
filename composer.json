@@ -2,10 +2,7 @@
     "name": "buildfail/gender",
     "description": "A port of the PHP extension php-gender written by Anatol Belski to raw PHP.",
     "type": "library",
-    "require-dev": {
-        "phpunit/phpunit": "^7.5",
-        "friendsofphp/php-cs-fixer": "^2.14"
-    },
+
     "license": "MIT",
     "authors": [
         {
