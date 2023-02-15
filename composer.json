@@ -1,5 +1,5 @@
 {
-    "name": "johnvandeweghe/gender",
+    "name": "buildfail/gender",
     "description": "A port of the PHP extension php-gender written by Anatol Belski to raw PHP.",
     "type": "library",
     "require-dev": {
