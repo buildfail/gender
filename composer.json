@@ -9,22 +9,12 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "John VanDeWeghe",
-            "email": "vandeweghe@lunixlabs.com"
-        },
-        {
-            "name": "Jon Harder",
-            "email": "jonharder6@gmail.com"
+            "name": "build fail",
+            "email": "buildfail@edgesend.com"
         }
     ],
     "require": {
         "php": "^7.1"
-    },
-    "conflict": {
-        "ext-gender": "*"
-    },
-    "replace": {
-        "ext-gender": "^1.1.0"
     },
     "autoload": {
         "psr-4": {
